@@ -9,8 +9,15 @@ import {
 
 import type { Route } from "./+types/root"
 import "./app.css"
-import { ThemeContext } from "./react-contexts/context"
+import { AuthContext, ThemeContext } from "./react-contexts/context"
 import { useEffect, useState } from "react"
+import type {
+  AuthContextProps,
+  RegisterResponse
+} from "./types/types"
+import axios from "axios"
+import { api } from "./axios/axios"
+import { accessTokenStorage } from "./utils/frontend-utils"
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -27,12 +34,47 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [isDark, setDark] = useState(false)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [user, setUser] = useState<AuthContextProps["user"] | null>(
+    null
+  )
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light"
     if (savedTheme === "dark") {
       setDark(true)
     }
   }, [])
+
+  useEffect(() => {
+    const getNewRefreshToken = async () => {
+      try {
+        let res = await api.post<{
+          accessToken: string
+          user: { id: number; email: string; name: string }
+        }>("/auth/refresh")
+        setAccessToken(res.data.accessToken)
+        setUser(res.data.user)
+        accessTokenStorage.setAccessToken(res.data.accessToken)
+      } catch (error) {
+        if (
+          axios.isAxiosError<Omit<RegisterResponse, "user">>(error)
+        ) {
+          let errorMessage = error.response?.data?.message
+          console.log(`Could not refresh the token! ${errorMessage}`)
+          setUser(null)
+          setAccessToken("")
+        } else {
+          console.log(`An unexpected error occured! ${error}`)
+        }
+      }
+    }
+    getNewRefreshToken()
+  }, [])
+
+  useEffect(() => {
+    accessTokenStorage.setAccessToken(accessToken as string)
+  }, [accessToken])
 
   useEffect(() => {
     if (isDark) {
@@ -43,22 +85,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [isDark])
   return (
     <ThemeContext.Provider value={{ isDark, setDark }}>
-      <html lang="en" className={isDark ? "dark" : ""}>
-        <head>
-          <meta charSet="utf-8" />
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1"
-          />
-          <Meta />
-          <Links />
-        </head>
-        <body className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-        </body>
-      </html>
+      <AuthContext.Provider
+        value={{ accessToken, setAccessToken, user, setUser }}
+      >
+        <html lang="en" className={isDark ? "dark" : ""}>
+          <head>
+            <meta charSet="utf-8" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            />
+            <Meta />
+            <Links />
+          </head>
+          <body className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
+            {children}
+            <ScrollRestoration />
+            <Scripts />
+          </body>
+        </html>
+      </AuthContext.Provider>
     </ThemeContext.Provider>
   )
 }
