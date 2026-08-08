@@ -6,7 +6,9 @@ import {
 
 export default [
   index("routes/home/index.tsx"),
-  route("api", "routes/api/index.tsx"),
-  route("api/:code", "routes/api-detail-page/index.tsx"),
+  route("countries", "routes/api/index.tsx"),
+  route("country/:code", "routes/api-detail-page/index.tsx"),
+  route("register", "routes/register/index.tsx"),
+  route("login", "routes/login/index.tsx"),
   route("*", "routes/not-found-page/index.tsx")
 ] satisfies RouteConfig

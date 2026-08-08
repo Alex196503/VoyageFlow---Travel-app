@@ -1,7 +1,111 @@
-import type { Route } from "./+types"
+import { useAuth, useThemeContext } from "~/custom-hooks/react-hooks"
+import ApiNav from "../api/local_components/ApiNav"
+import { IoMoon } from "react-icons/io5"
+import { IoSunny } from "react-icons/io5"
 import { getMeta } from "~/helpers/helpers"
 export const meta = () => getMeta("Home")
 
 export default function Home() {
-  return <h3>Hello</h3>
+  const { isDark, setDark } = useThemeContext()
+  const { user } = useAuth()
+  return (
+    <>
+      <ApiNav
+        navTitle="Visit a new country"
+        bookingStatus="live"
+        bgColor={isDark ? "Dark" : "Light"}
+        setDark={setDark}
+        isDark={isDark}
+        user={user}
+      >
+        {isDark ? <IoMoon /> : <IoSunny />}
+      </ApiNav>
+      <main className="max-w-6xl mx-auto px-6 py-10 flex flex-col gap-10">
+        <section className="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-8 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-2 text-center md:text-left">
+            <h1 className="text-3xl font-extrabold tracking-tight text-white">
+              Welcome to VoyageFlow 🚀
+            </h1>
+            <p className="text-sm text-slate-400">
+              Manage your routes, authenticate securely, and explore
+              the world.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="/login"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/20"
+            >
+              Get Started
+            </a>
+          </div>
+        </section>
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1 bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center text-center gap-4 shadow-xl">
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
+                alt="User profile"
+                className="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/50 shadow-md"
+              />
+              <span className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">
+                alex_traveler
+              </h3>
+              <p className="text-xs text-slate-400">
+                alex.traveler@example.com
+              </p>
+            </div>
+            <span className="text-[11px] font-semibold tracking-wider uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
+              Active Explorer
+            </span>
+            <button className="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-slate-700/50">
+              View Profile
+            </button>
+          </div>
+          <div className="md:col-span-2 bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between shadow-xl">
+            <div className="space-y-3">
+              <h3 className="text-xl font-bold text-white">
+                Your Next Adventures
+              </h3>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                You haven't scheduled any trips yet. Start organizing
+                your dream destinations in a simple, elegant, and fast
+                way.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 mt-6 text-center">
+              <div className="bg-slate-800/40 border border-slate-700/40 p-3 rounded-2xl">
+                <span className="block text-xl font-bold text-white">
+                  0
+                </span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider">
+                  Trips
+                </span>
+              </div>
+              <div className="bg-slate-800/40 border border-slate-700/40 p-3 rounded-2xl">
+                <span className="block text-xl font-bold text-white">
+                  0
+                </span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider">
+                  Countries
+                </span>
+              </div>
+              <div className="bg-slate-800/40 border border-slate-700/40 p-3 rounded-2xl">
+                <span className="block text-xl font-bold text-white">
+                  1
+                </span>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider">
+                  Level
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
+  )
 }

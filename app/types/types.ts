@@ -1,3 +1,6 @@
+import type { ZodFormattedError } from "zod"
+import type { RegisterSchema } from "~/utils/validation/zod-validation"
+
 export interface RawCountry {
   name: string
   nativeName?: string
@@ -21,4 +24,35 @@ export interface Currency {
 export interface ThemeContextProps {
   isDark: boolean
   setDark: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export interface UserRegisterProps {
+  name: string
+  email: string
+  password: string
+}
+
+export interface RegisterResponse {
+  success: boolean
+  message: string | ZodFormattedError<typeof RegisterSchema>
+  accessToken?: string
+  user?: {
+    id?: number | undefined
+    name: string
+    email: string
+  }
+}
+
+export interface AuthenticatedUser {
+  id: string
+}
+
+export interface AuthContextProps {
+  accessToken: string | null
+  setAccessToken: (token: string) => void
+  user?: {
+    id?: number
+    name?: string
+  } | null
+  setUser: (user: AuthContextProps["user"]) => void
 }
