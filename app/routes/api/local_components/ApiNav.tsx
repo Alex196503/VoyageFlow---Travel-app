@@ -3,7 +3,6 @@ import type { ReactNode } from "react"
 import { useNavigate } from "react-router"
 import { api } from "~/axios/axios"
 import { useAuth } from "~/custom-hooks/react-hooks"
-import type { RegisterResponse } from "~/types/types"
 
 export default function ApiNav({
   navTitle,
@@ -24,6 +23,7 @@ export default function ApiNav({
     | {
         id?: number | undefined
         name?: string | undefined
+        avatar?: string | undefined
       }
     | null
     | undefined
@@ -85,8 +85,8 @@ export default function ApiNav({
                   className="flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
-                    alt="User"
+                    src={user?.avatar}
+                    alt={`Image with the user: ${user?.name}`}
                     className="w-7 h-7 rounded-full object-cover border border-indigo-500"
                   />
                   <span className="text-sm font-medium text-white">

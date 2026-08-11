@@ -2,8 +2,32 @@ import { Form } from "react-router"
 import { TextInput } from "./local_components/InputText"
 import { useAuthSubmit } from "~/custom-hooks/react-hooks"
 import { RegisterSchema } from "~/utils/validation/zod-validation"
+import { FileInput } from "./local_components/FileInput"
 
 export default function Register() {
+  const registerFields = [
+    {
+      label: "name",
+      placeholder: "e.g: alex_traveler",
+      fieldType: "text"
+    },
+    {
+      label: "email",
+      placeholder: "name@example.com",
+      fieldType: "email"
+    },
+    { label: "avatar", fieldType: "file", accept: "image/*" },
+    {
+      label: "password",
+      placeholder: "••••••••",
+      fieldType: "password"
+    },
+    {
+      label: "confirmPassword",
+      placeholder: "••••••••",
+      fieldType: "password"
+    }
+  ]
   const { error, loading, handleSubmit } = useAuthSubmit(
     "/auth/register",
     "/",
@@ -51,6 +75,7 @@ export default function Register() {
             noValidate
             onSubmit={handleSubmit}
             method="post"
+            encType="multipart/form-data"
           >
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">
@@ -83,26 +108,23 @@ export default function Register() {
                 )}
               </div>
             )}
-            <TextInput
-              label="name"
-              placeholder="e.g: alex_traveler"
-              fieldType="text"
-            />
-            <TextInput
-              label="email"
-              placeholder="name@example.com"
-              fieldType="email"
-            />
-            <TextInput
-              label="password"
-              placeholder="••••••••"
-              fieldType="password"
-            />
-            <TextInput
-              label="confirmPassword"
-              placeholder="••••••••"
-              fieldType="password"
-            />
+            {registerFields.map((field) => {
+              return field.fieldType === "file" ? (
+                <FileInput
+                  key={field.label}
+                  label={field.label}
+                  fieldType={field.fieldType}
+                  accept={field.accept as string}
+                />
+              ) : (
+                <TextInput
+                  key={field.label}
+                  label={field.label}
+                  fieldType={field.fieldType}
+                  placeholder={field.placeholder}
+                />
+              )
+            })}
             <button
               type="submit"
               disabled={loading}

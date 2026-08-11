@@ -10,12 +10,15 @@ import { useEffect } from "react"
 import { toast } from "react-toastify"
 import CountryContainer from "./local_components/CountryContainer"
 import type { RawCountry } from "~/types/types"
-import { useThemeContext } from "~/custom-hooks/react-hooks"
+import { useAuth, useThemeContext } from "~/custom-hooks/react-hooks"
+import { requireAuthOnServer } from "~/utils/frontend-utils"
 export const meta = getMeta(
   "Detail page for every country",
   "Check some information about the country"
 )
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  await requireAuthOnServer(request)
+
   try {
     const rawData = await getCountriesRawData()
     const countries = (rawData || []).map((country) => ({
@@ -52,6 +55,7 @@ export default function DefaultPage() {
   const foundCountry = countries.find(
     (country) => country.code === code
   )
+  const { user } = useAuth()
   useEffect(() => {
     if (!error) return
     toast.error(error || "An unknown error occurred!")
@@ -60,6 +64,7 @@ export default function DefaultPage() {
   return (
     <>
       <ApiNav
+        user={user}
         navTitle="Where in the world?"
         bookingStatus="live"
         bgColor={isDark ? "Dark" : "Light"}
@@ -70,7 +75,7 @@ export default function DefaultPage() {
       </ApiNav>
       <main className="w-full px-6 md:px-22 py-8">
         <Link
-          to="/api"
+          to="/countries"
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border border-zinc-200 bg-white text-zinc-700 shadow-sm transition-colors duration-200 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 cursor-pointer"
         >
           <FiArrowLeft className="w-4 h-4" />

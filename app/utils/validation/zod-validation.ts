@@ -1,4 +1,13 @@
 import * as z from "zod"
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp"
+]
+
 export const RegisterSchema = z
   .object({
     name: z
@@ -22,6 +31,18 @@ export const RegisterSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"]
   })
+
+export const FileValidationSchema = z.object({
+  originalname: z.string(),
+  filename: z.string(),
+  mimetype: z
+    .string()
+    .refine(
+      (type) => ACCEPTED_IMAGE_TYPES.includes(type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ),
+  size: z.number().max(MAX_FILE_SIZE, "Max file size is 5MB.")
+})
 
 export const LoginSchema = z.object({
   email: z

@@ -1,16 +1,12 @@
+import type { InputProps } from "~/types/types"
+
 export const TextInput = ({
   label,
   fieldType,
   placeholder,
   minLength = 2,
   maxLength = 50
-}: {
-  label: string
-  fieldType: string
-  placeholder: string
-  minLength?: number
-  maxLength?: number
-}) => {
+}: InputProps) => {
   return (
     <section className="flex flex-col gap-y-2">
       <label

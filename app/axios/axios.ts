@@ -7,7 +7,10 @@ declare module "axios" {
   }
 }
 
-const baseURL = import.meta.env.VITE_API_URL || "/api"
+const baseURL =
+  typeof window !== "undefined"
+    ? import.meta.env.VITE_API_URL || "/api"
+    : process.env.VITE_API_URL || "http://localhost:5000/api"
 
 // Create an axios instance with base URL configuration and credential support for authenticated API requests
 export const api = axios.create({
@@ -33,6 +36,10 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config
     if (!originalRequest) {
+      return Promise.reject(error)
+    }
+    if (originalRequest.url?.includes("/auth/refresh")) {
+      accessTokenStorage.setAccessToken("")
       return Promise.reject(error)
     }
     if (error?.response?.status === 401 && !originalRequest?._retry) {

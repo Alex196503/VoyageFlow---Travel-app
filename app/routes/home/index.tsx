@@ -3,7 +3,14 @@ import ApiNav from "../api/local_components/ApiNav"
 import { IoMoon } from "react-icons/io5"
 import { IoSunny } from "react-icons/io5"
 import { getMeta } from "~/helpers/helpers"
+import type { LoaderFunctionArgs } from "react-router"
+import { requireAuthOnServer } from "~/utils/frontend-utils"
 export const meta = () => getMeta("Home")
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAuthOnServer(request)
+  return null
+}
 
 export default function Home() {
   const { isDark, setDark } = useThemeContext()
@@ -33,7 +40,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/login"
+              href="/trips"
               className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/20"
             >
               Get Started
@@ -44,7 +51,7 @@ export default function Home() {
           <div className="md:col-span-1 bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center text-center gap-4 shadow-xl">
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
+                src={user?.avatar}
                 alt="User profile"
                 className="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/50 shadow-md"
               />
@@ -52,11 +59,24 @@ export default function Home() {
             </div>
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-white">
-                alex_traveler
+                {user?.name}
               </h3>
               <p className="text-xs text-slate-400">
-                alex.traveler@example.com
+                {user?.email}
               </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold">{user?.name}</h1>
+              {user?.isVerified ? (
+                <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                  Verified ✓
+                </span>
+              ) : (
+                <span className="bg-red-700 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                  {" "}
+                  Not verified X{" "}
+                </span>
+              )}
             </div>
             <span className="text-[11px] font-semibold tracking-wider uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
               Active Explorer
@@ -77,7 +97,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 mt-6 text-center">
+            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-800/80 mt-6 text-center">
               <div className="bg-slate-800/40 border border-slate-700/40 p-3 rounded-2xl">
                 <span className="block text-xl font-bold text-white">
                   0
@@ -92,14 +112,6 @@ export default function Home() {
                 </span>
                 <span className="text-[11px] text-slate-400 uppercase tracking-wider">
                   Countries
-                </span>
-              </div>
-              <div className="bg-slate-800/40 border border-slate-700/40 p-3 rounded-2xl">
-                <span className="block text-xl font-bold text-white">
-                  1
-                </span>
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider">
-                  Level
                 </span>
               </div>
             </div>

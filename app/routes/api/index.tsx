@@ -19,17 +19,21 @@ import { type CSSProperties } from "react"
 import { ClipLoader } from "react-spinners"
 import { CountryCard } from "~/routes/api/local_components/CountryCard"
 import {
+  useAuth,
   useDebouncer,
   useThemeContext
 } from "~/custom-hooks/react-hooks"
 import PaginationComponent from "~/components/ApiComponents/Pagination"
 import { getMeta } from "~/helpers/helpers"
 import { getCountriesRawData } from "~/utils/node-utils"
+import { requireAuthOnServer } from "~/utils/frontend-utils"
 
 export const meta = () =>
   getMeta("Our API", "Check some information about several countries")
 //This code runs on server in SSR
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  await requireAuthOnServer(request)
+
   try {
     const rawData = await getCountriesRawData()
     const countries = (rawData || []).map((country) => ({
@@ -66,6 +70,7 @@ export default function ApiPage() {
   const debouncedValue = useDebouncer(search, 1000)
   const navigate = useNavigation()
   const isLoading = navigate.state === "loading"
+  const { user } = useAuth()
 
   useEffect(() => {
     if (!error) return
@@ -114,6 +119,7 @@ export default function ApiPage() {
         bgColor={isDark ? "Dark" : "Light"}
         setDark={setDark}
         isDark={isDark}
+        user={user}
       >
         {isDark ? <IoMoon /> : <IoSunny />}
       </ApiNav>
@@ -162,7 +168,9 @@ export default function ApiPage() {
               .map((country) => {
                 return (
                   <CountryCard
-                    onClick={() => redirectTo(`/api/${country.code}`)}
+                    onClick={() =>
+                      redirectTo(`/country/${country.code}`)
+                    }
                     key={country.code}
                     country={country}
                   />

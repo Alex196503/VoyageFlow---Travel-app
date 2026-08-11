@@ -26,6 +26,18 @@ export interface ThemeContextProps {
   setDark: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+export type InputProps = {
+  label: string
+  fieldType: string
+  placeholder?: string
+  minLength?: number
+  maxLength?: number
+}
+
+export type InputFile = InputProps & {
+  accept: string
+}
+
 export interface UserRegisterProps {
   name: string
   email: string
@@ -40,6 +52,8 @@ export interface RegisterResponse {
     id?: number | undefined
     name: string
     email: string
+    avatar?: string
+    isVerified?: boolean
   }
 }
 
@@ -53,6 +67,9 @@ export interface AuthContextProps {
   user?: {
     id?: number
     name?: string
+    avatar?: string
+    email: string
+    isVerified?: boolean
   } | null
   setUser: (user: AuthContextProps["user"]) => void
 }
