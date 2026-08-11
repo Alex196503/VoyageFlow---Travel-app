@@ -6,6 +6,9 @@ import {
   type Request,
   type NextFunction
 } from "express"
+import multer from "multer"
+import { cloudinaryVar } from "../cloudinary-config"
+import { CloudinaryStorage } from "multer-storage-cloudinary"
 
 //Handler that fetches and parses the raw countries dataset(SERVER-ONLY HANDLER). Isolated inside this node-utils file to make sure Node.js modules are never bundled into the client code.
 const filePath = path.join(process.cwd(), "data.json")
@@ -40,3 +43,24 @@ export const globalErrorHandler = (
     error: err.message || "Internal Server Error"
   })
 }
+
+export const uploadMiddleware = (folderName: string) => {
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinaryVar,
+    params: async (req: Request, file: Express.Multer.File) => {
+      const publicId = `${file.fieldname}-${Date.now()}`
+      return {
+        public_id: publicId,
+        folder: folderName.trim(),
+        format: "webp"
+      }
+    }
+  })
+  return multer({
+    storage: storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024
+    }
+  })
+}
+

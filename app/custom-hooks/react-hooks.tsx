@@ -44,11 +44,23 @@ export function useAuthSubmit<AuthSchema extends ZodTypeAny>(
       setLoading(false)
       return
     }
+    if (formData.has("avatar")) {
+      const avatarFile = formData.get("avatar") as File
+      if (!avatarFile || avatarFile.size === 0) {
+        setError({
+          _errors: [],
+          avatar: { _errors: ["Profile picture is required"] }
+        })
+        setLoading(false)
+        return
+      }
+    }
     try {
+      const dataToSend = url.includes("/login") ? payload : formData
       const res = await api.post<
         RegisterResponse & { accessToken: string }
-      >(url, payload)
-      setAccessToken(res.data?.user?.accessToken as string)
+      >(url, dataToSend, {})
+      setAccessToken(res.data.accessToken as string)
       setUser(res.data.user)
       navigate(redirectTo)
     } catch (err: unknown) {

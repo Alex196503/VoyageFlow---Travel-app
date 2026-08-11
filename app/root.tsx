@@ -51,7 +51,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       try {
         let res = await api.post<{
           accessToken: string
-          user: { id: number; email: string; name: string }
+          user: {
+            id: number
+            email: string
+            name: string
+            avatar: string,
+            isVerified?: boolean
+          }
         }>("/auth/refresh")
         setAccessToken(res.data.accessToken)
         setUser(res.data.user)

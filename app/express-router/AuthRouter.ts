@@ -13,11 +13,12 @@ import {
 import type { RegisterResponse } from "../types/types"
 import express from "express"
 import { prisma } from "../../prisma/prisma"
-import { authentificationMiddleware } from "~/middleware/authMiddleware"
 import {
+  FileValidationSchema,
   LoginSchema,
   RegisterSchema
 } from "~/utils/validation/zod-validation"
+import { uploadMiddleware } from "~/utils/node-utils"
 
 export const AuthRouter = express.Router()
 const bcryptHasher = new BCryptHasher()
@@ -30,6 +31,7 @@ const authService = new AuthService(
 
 AuthRouter.post(
   "/register",
+  uploadMiddleware("avatars").single("avatar"),
   async (
     req: Request<
       {},
@@ -39,6 +41,7 @@ AuthRouter.post(
         email: string
         password: string
         confirmPassword: string
+        avatar: File
       }
     >,
     res: Response<RegisterResponse>,
@@ -46,17 +49,39 @@ AuthRouter.post(
   ) => {
     const { name, email, password, confirmPassword } = req.body || {}
     try {
-      const resultRegister = RegisterSchema.safeParse(req.body)
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Profile picture is required",
+          success: false
+        })
+      }
+      const resultRegister = RegisterSchema.safeParse({
+        name,
+        email,
+        password,
+        confirmPassword
+      })
       if (!resultRegister.success) {
         return res.status(400).json({
           success: false,
           message: resultRegister.error.format()
         })
       }
+      const resultFileAvatar = FileValidationSchema.safeParse(
+        req.file
+      )
+      if (!resultFileAvatar.success) {
+        return res.status(400).json({
+          success: false,
+          message: resultFileAvatar.error.format()
+        })
+      }
+      const avatar = req.file.path
       const newUser = await authService.registerUser(
         name,
         email,
-        password
+        password,
+        avatar as string
       )
       res.cookie("refreshToken", newUser.refreshToken, {
         httpOnly: true,
@@ -70,9 +95,9 @@ AuthRouter.post(
         message: "User registered successfully!",
         user: userWithoutSensitiveDAta
       })
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof BadRequestError) {
-        return res.status(400).json({
+        return res.status(401).json({
           message: err.message,
           success: false
         })
@@ -135,7 +160,6 @@ AuthRouter.post(
   ) => {
     try {
       const { id } = req.body
-      console.log(id)
       if (id) {
         await prisma.user.update({
           where: { id: Number(id) },
@@ -182,7 +206,9 @@ AuthRouter.post(
         user: {
           id: result.user.id,
           email: result.user.email,
-          name: result.user.name
+          name: result.user.name,
+          avatar: result.user.avatar as string,
+          isVerified: result.user.isVerified
         }
       })
     } catch (err) {

@@ -74,7 +74,8 @@ export class AuthService {
   registerUser = async (
     name: string,
     email: string,
-    password: string
+    password: string,
+    avatar: string
   ) => {
     let existingUser = await this.prisma.user.findUnique({
       where: { email }
@@ -87,7 +88,8 @@ export class AuthService {
       data: {
         name,
         email,
-        password: saltedPassword
+        password: saltedPassword,
+        avatar_url: avatar
       }
     })
     let accessToken = this.tokenService.generateToken(
@@ -182,7 +184,9 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        avatar: user.avatar_url,
+        isVerified: user.is_verified
       }
     }
   }
