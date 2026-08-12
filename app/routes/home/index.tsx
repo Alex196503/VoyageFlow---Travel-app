@@ -5,6 +5,10 @@ import { IoSunny } from "react-icons/io5"
 import { getMeta } from "~/helpers/helpers"
 import type { LoaderFunctionArgs } from "react-router"
 import { requireAuthOnServer } from "~/utils/frontend-utils"
+import axios from "axios"
+import { toast, ToastContainer } from "react-toastify"
+import { api } from "~/axios/axios"
+import { useState } from "react"
 export const meta = () => getMeta("Home")
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -13,6 +17,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function Home() {
+  const [isLoading, setLoading] = useState(false)
+  const handleResendVerification = async () => {
+    setLoading(true)
+    try {
+      let response = await api.post<{
+        success: boolean
+        message: string
+      }>("/auth/resend-verification-email")
+      if (response.data.success) {
+        toast.success(
+          response.data.message ||
+            "Verification email sent! Check your inbox."
+        )
+      }
+    } catch (error) {
+      let errorMessage = "An unexpected error occurred"
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      toast.error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
   const { isDark, setDark } = useThemeContext()
   const { user } = useAuth()
   return (
@@ -61,9 +91,7 @@ export default function Home() {
               <h3 className="text-lg font-bold text-white">
                 {user?.name}
               </h3>
-              <p className="text-xs text-slate-400">
-                {user?.email}
-              </p>
+              <p className="text-xs text-slate-400">{user?.email}</p>
             </div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold">{user?.name}</h1>
@@ -81,9 +109,21 @@ export default function Home() {
             <span className="text-[11px] font-semibold tracking-wider uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
               Active Explorer
             </span>
-            <button className="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-slate-700/50">
-              View Profile
-            </button>
+            <div className="w-full flex flex-col gap-2 mt-2">
+              <button className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-slate-700/50">
+                View Profile
+              </button>
+              {!user?.isVerified && (
+                <button
+                  className="w-full cursor-pointer bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-amber-500/50"
+                  onClick={handleResendVerification}
+                >
+                  {isLoading
+                    ? "Sending..."
+                    : "Resend Verification Email"}
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between shadow-xl">
             <div className="space-y-3">
@@ -117,6 +157,11 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          closeOnClick={true}
+        />
       </main>
     </>
   )

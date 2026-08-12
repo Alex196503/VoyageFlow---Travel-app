@@ -44,6 +44,7 @@ export const globalErrorHandler = (
   })
 }
 
+// Middleware that returns a configured multer instance using CloudinaryStorage.
 export const uploadMiddleware = (folderName: string) => {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinaryVar,
@@ -63,4 +64,3 @@ export const uploadMiddleware = (folderName: string) => {
     }
   })
 }
-
