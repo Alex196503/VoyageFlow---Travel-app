@@ -3,12 +3,15 @@ import {
   type Request,
   type Response
 } from "express"
-import jwt from "jsonwebtoken"
+import crypto from "crypto"
 import {
   AuthService,
   BadRequestError,
   BCryptHasher,
-  JwtTokenService
+  CryptoRandomTokenGenerator,
+  JwtTokenService,
+  SHA256EmailVerificationTokenCrypto,
+  UnauthorizedError
 } from "../server/auth/AuthService"
 import type { RegisterResponse } from "../types/types"
 import express from "express"
@@ -19,14 +22,22 @@ import {
   RegisterSchema
 } from "~/utils/validation/zod-validation"
 import { uploadMiddleware } from "~/utils/node-utils"
+import sendEmailNotification from "~/nodemailer-config"
+import { authentificationMiddleware } from "~/middleware/authMiddleware"
 
 export const AuthRouter = express.Router()
 const bcryptHasher = new BCryptHasher()
 const jwtTokenService = new JwtTokenService()
+const EmailVerificationTokenGenerator =
+  new CryptoRandomTokenGenerator()
+const EmailVerificationService =
+  new SHA256EmailVerificationTokenCrypto()
 const authService = new AuthService(
   prisma,
   bcryptHasher,
-  jwtTokenService
+  jwtTokenService,
+  EmailVerificationService,
+  EmailVerificationTokenGenerator
 )
 
 AuthRouter.post(
@@ -48,6 +59,9 @@ AuthRouter.post(
     next: NextFunction
   ) => {
     const { name, email, password, confirmPassword } = req.body || {}
+    const emailVerificationToken = crypto
+      .randomBytes(64)
+      .toString("hex")
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -81,7 +95,8 @@ AuthRouter.post(
         name,
         email,
         password,
-        avatar as string
+        avatar as string,
+        emailVerificationToken
       )
       res.cookie("refreshToken", newUser.refreshToken, {
         httpOnly: true,
@@ -89,11 +104,17 @@ AuthRouter.post(
         sameSite: "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000
       })
-      const { refreshToken, ...userWithoutSensitiveDAta } = newUser
+      let text = `Hello! Please click the link to validate your email: ${process.env.VALIDATION_LINK}?token=${emailVerificationToken}`
+      await sendEmailNotification(
+        newUser.email,
+        "Email validation",
+        text
+      )
+      const { refreshToken, ...userWithoutSensitiveData } = newUser
       return res.status(201).json({
         success: true,
         message: "User registered successfully!",
-        user: userWithoutSensitiveDAta
+        user: userWithoutSensitiveData
       })
     } catch (err: any) {
       if (err instanceof BadRequestError) {
@@ -212,10 +233,92 @@ AuthRouter.post(
         }
       })
     } catch (err) {
-      return res.status(401).json({
-        message: "Invalid or expired refresh token",
-        success: false
+      if (
+        err instanceof BadRequestError ||
+        err instanceof UnauthorizedError
+      ) {
+        return res.status(401).json({
+          message: err.message,
+          success: false
+        })
+      }
+      return next(err)
+    }
+  }
+)
+
+AuthRouter.post(
+  "/verify-email",
+  async (
+    req: Request<{}, {}, { token: string }>,
+    res: Response<RegisterResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      let { token } = req.body
+      if (
+        !token ||
+        typeof token !== "string" ||
+        token.trim() === ""
+      ) {
+        return res.status(400).json({
+          message: "Token is required",
+          success: false
+        })
+      }
+      let result = await authService.validateEmailVerification(token)
+      return res.status(200).json({
+        message: result.message,
+        success: result.success
       })
+    } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        return res.status(401).json({
+          message: err.message,
+          success: false
+        })
+      }
+      return next(err)
+    }
+  }
+)
+
+AuthRouter.post(
+  "/resend-verification-email",
+  authentificationMiddleware,
+  async (
+    req: Request,
+    res: Response<{ success: boolean; message: string }>,
+    next: NextFunction
+  ) => {
+    try {
+      const idUser = req.user?.id
+      if (!idUser) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" })
+      }
+      const { email, newVerificationToken } =
+        await authService.validateEmailResendVerification(idUser)
+      const text = `Hello! Here is your new verification link: ${process.env.VALIDATION_LINK}?token=${newVerificationToken}`
+      await sendEmailNotification(
+        email,
+        "New Email Validation Link",
+        text
+      )
+      return res.status(200).json({
+        success: true,
+        message:
+          "A new verification link has been sent to your email!"
+      })
+    } catch (err) {
+      if (err instanceof BadRequestError) {
+        return res.status(401).json({
+          message: err.message,
+          success: false
+        })
+      }
+      return next(err)
     }
   }
 )

@@ -49,7 +49,10 @@ export default function ApiNav({
           error.response?.data?.message || error.message
         )
       } else {
-        console.error("An unexpected error occurred during logout")
+        console.error(
+          "An unexpected error occurred during logout",
+          error
+        )
       }
       setUser(null)
       setAccessToken("")
