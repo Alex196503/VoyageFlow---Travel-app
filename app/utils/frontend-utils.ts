@@ -48,3 +48,18 @@ export const requireAuthOnServer = async (request: Request) => {
     throw redirect("/login?token=invalid")
   }
 }
+
+// Loader helper: redirect authenticated users away from public auth pages, reads `refreshToken` from incoming request cookies and returns a `redirect` to `/` when present.
+export const redirectIfAuthenticated = (request: Request) => {
+  const cookieHeaders = request.headers.get("cookie") || ""
+  const cookies = Object.fromEntries(
+    cookieHeaders.split("; ").map((cookie) => {
+      const [key, ...v] = cookie.split("=")
+      return [key, v.join("=")]
+    })
+  )
+  if (cookies["refreshToken"]) {
+    return redirect("/?message=alreadyLoggedIn")
+  }
+  return null
+}

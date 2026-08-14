@@ -6,13 +6,16 @@ import {
 import crypto from "crypto"
 import {
   AuthService,
-  BadRequestError,
-  BCryptHasher,
-  CryptoRandomTokenGenerator,
-  JwtTokenService,
-  SHA256EmailVerificationTokenCrypto,
-  UnauthorizedError
+  JwtTokenService
 } from "../server/auth/AuthService"
+import {
+  BCryptHasher,
+  SHA256TokenCrypto
+} from "~/server/auth/security-helpers"
+import {
+  BadRequestError,
+  UnauthorizedError
+} from "~/server/auth/custom-errors"
 import type { RegisterResponse } from "../types/types"
 import express from "express"
 import { prisma } from "../../prisma/prisma"
@@ -23,23 +26,17 @@ import {
 } from "~/utils/validation/zod-validation"
 import { uploadMiddleware } from "~/utils/node-utils"
 import sendEmailNotification from "~/nodemailer-config"
-import { authentificationMiddleware } from "~/middleware/authMiddleware"
 
 export const AuthRouter = express.Router()
 const bcryptHasher = new BCryptHasher()
 const jwtTokenService = new JwtTokenService()
-const EmailVerificationTokenGenerator =
-  new CryptoRandomTokenGenerator()
-const EmailVerificationService =
-  new SHA256EmailVerificationTokenCrypto()
+const EmailVerificationService = new SHA256TokenCrypto()
 const authService = new AuthService(
   prisma,
   bcryptHasher,
   jwtTokenService,
-  EmailVerificationService,
-  EmailVerificationTokenGenerator
+  EmailVerificationService
 )
-
 AuthRouter.post(
   "/register",
   uploadMiddleware("avatars").single("avatar"),
@@ -116,7 +113,7 @@ AuthRouter.post(
         message: "User registered successfully!",
         user: userWithoutSensitiveData
       })
-    } catch (err: any) {
+    } catch (err) {
       if (err instanceof BadRequestError) {
         return res.status(401).json({
           message: err.message,
@@ -233,86 +230,7 @@ AuthRouter.post(
         }
       })
     } catch (err) {
-      if (
-        err instanceof BadRequestError ||
-        err instanceof UnauthorizedError
-      ) {
-        return res.status(401).json({
-          message: err.message,
-          success: false
-        })
-      }
-      return next(err)
-    }
-  }
-)
-
-AuthRouter.post(
-  "/verify-email",
-  async (
-    req: Request<{}, {}, { token: string }>,
-    res: Response<RegisterResponse>,
-    next: NextFunction
-  ) => {
-    try {
-      let { token } = req.body
-      if (
-        !token ||
-        typeof token !== "string" ||
-        token.trim() === ""
-      ) {
-        return res.status(400).json({
-          message: "Token is required",
-          success: false
-        })
-      }
-      let result = await authService.validateEmailVerification(token)
-      return res.status(200).json({
-        message: result.message,
-        success: result.success
-      })
-    } catch (err) {
       if (err instanceof UnauthorizedError) {
-        return res.status(401).json({
-          message: err.message,
-          success: false
-        })
-      }
-      return next(err)
-    }
-  }
-)
-
-AuthRouter.post(
-  "/resend-verification-email",
-  authentificationMiddleware,
-  async (
-    req: Request,
-    res: Response<{ success: boolean; message: string }>,
-    next: NextFunction
-  ) => {
-    try {
-      const idUser = req.user?.id
-      if (!idUser) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" })
-      }
-      const { email, newVerificationToken } =
-        await authService.validateEmailResendVerification(idUser)
-      const text = `Hello! Here is your new verification link: ${process.env.VALIDATION_LINK}?token=${newVerificationToken}`
-      await sendEmailNotification(
-        email,
-        "New Email Validation Link",
-        text
-      )
-      return res.status(200).json({
-        success: true,
-        message:
-          "A new verification link has been sent to your email!"
-      })
-    } catch (err) {
-      if (err instanceof BadRequestError) {
         return res.status(401).json({
           message: err.message,
           success: false

@@ -73,3 +73,12 @@ export interface AuthContextProps {
   } | null
   setUser: (user: AuthContextProps["user"]) => void
 }
+
+export type ExpressErrorResponse = {
+  success?: boolean
+  message?: string
+  errors?: {
+    password?: string
+    confirmPassword?: string
+  }
+}

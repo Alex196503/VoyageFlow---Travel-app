@@ -98,3 +98,25 @@ export function useAuth() {
   }
   return context
 }
+
+//Custom hook that provides a simple second-based countdown state and a formatted `MM:SS` string.
+export function useCountdown(initialTime = 0) {
+  const [countdown, setCountdown] = useState(initialTime)
+  useEffect(() => {
+    if (countdown <= 0) return
+    let timerId = setInterval(() => {
+      setCountdown((prev) => prev - 1)
+    }, 1000)
+    return () => clearInterval(timerId)
+  }, [countdown])
+  const minutes = Math.floor(countdown / 60)
+  const seconds = countdown % 60
+  const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+  return {
+    countdown,
+    setCountdown,
+    formattedTime,
+    isCounting: countdown > 0
+  }
+}
+

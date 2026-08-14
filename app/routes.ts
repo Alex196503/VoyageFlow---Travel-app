@@ -11,5 +11,7 @@ export default [
   route("register", "routes/register/index.tsx"),
   route("login", "routes/login/index.tsx"),
   route("/verify-email", "routes/verify-email/index.tsx"),
+  route("/forgot-password", "routes/forgot-password-page/index.tsx"),
+  route("/reset-password", "routes/reset-password-page/index.tsx"),
   route("*", "routes/not-found-page/index.tsx")
 ] satisfies RouteConfig

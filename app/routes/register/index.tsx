@@ -1,8 +1,13 @@
-import { Form } from "react-router"
+import { Form, type LoaderFunctionArgs } from "react-router"
 import { TextInput } from "./local_components/InputText"
 import { useAuthSubmit } from "~/custom-hooks/react-hooks"
 import { RegisterSchema } from "~/utils/validation/zod-validation"
 import { FileInput } from "./local_components/FileInput"
+import { redirectIfAuthenticated } from "~/utils/frontend-utils"
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  return redirectIfAuthenticated(request) || null
+}
 
 export default function Register() {
   const registerFields = [
