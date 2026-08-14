@@ -1,7 +1,12 @@
-import { Form } from "react-router"
+import { Form, type LoaderFunctionArgs } from "react-router"
 import { TextInput } from "../register/local_components/InputText"
 import { useAuthSubmit } from "~/custom-hooks/react-hooks"
 import { LoginSchema } from "~/utils/validation/zod-validation"
+import { redirectIfAuthenticated } from "~/utils/frontend-utils"
+export async function loader({ request }: LoaderFunctionArgs) {
+  return redirectIfAuthenticated(request) || null
+}
+
 export default function LoginPage() {
   const { error, loading, handleSubmit } = useAuthSubmit(
     "/auth/login",
@@ -83,7 +88,7 @@ export default function LoginPage() {
           </button>
         </Form>
 
-        <section className="flex justify-center items-center w-full mt-8 pt-6 border-t border-slate-800/80">
+        <section className="flex flex-col gap-y-2 justify-center items-center w-full mt-8 pt-6 border-t border-slate-800/80">
           <p className="text-xs text-slate-400">
             Don't have an account?
             <a
@@ -91,6 +96,15 @@ export default function LoginPage() {
               className="text-indigo-400 font-medium hover:text-indigo-300 transition-colors ml-1"
             >
               Register
+            </a>
+          </p>
+          <p className="text-xs text-gray-400">
+            Forgot your password?
+            <a
+              href="/forgot-password"
+              className="text-red-400 font-medium hover:text-red-600 transition-colors ml-1"
+            >
+              Reset your password
             </a>
           </p>
         </section>

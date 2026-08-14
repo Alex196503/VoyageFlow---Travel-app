@@ -8,6 +8,8 @@ import {
   routeNotFoundHandler
 } from "~/utils/node-utils"
 import type { AuthenticatedUser } from "~/types/types"
+import { VerificationRouter } from "~/express-router/VerificationRouter"
+import { PasswordRouter } from "~/express-router/PasswordRouter"
 
 //Singleton pattern for server instance
 class Server {
@@ -47,7 +49,8 @@ server.useMiddleware(express.urlencoded({ extended: true }))
 server.useMiddleware(cookieParser())
 
 server.addRouter("/api/auth", AuthRouter)
-
+server.addRouter("/api/auth", VerificationRouter)
+server.addRouter("/api/auth", PasswordRouter)
 server.useMiddleware(routeNotFoundHandler)
 server.addMiddlewareError(globalErrorHandler)
 

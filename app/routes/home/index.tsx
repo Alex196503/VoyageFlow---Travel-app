@@ -1,4 +1,8 @@
-import { useAuth, useThemeContext } from "~/custom-hooks/react-hooks"
+import {
+  useAuth,
+  useCountdown,
+  useThemeContext
+} from "~/custom-hooks/react-hooks"
 import ApiNav from "../api/local_components/ApiNav"
 import { IoMoon } from "react-icons/io5"
 import { IoSunny } from "react-icons/io5"
@@ -18,6 +22,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Home() {
   const [isLoading, setLoading] = useState(false)
+  const { countdown, setCountdown, formattedTime, isCounting } =
+    useCountdown(0)
   const handleResendVerification = async () => {
     setLoading(true)
     try {
@@ -26,6 +32,7 @@ export default function Home() {
         message: string
       }>("/auth/resend-verification-email")
       if (response.data.success) {
+        setCountdown(300)
         toast.success(
           response.data.message ||
             "Verification email sent! Check your inbox."
@@ -115,12 +122,16 @@ export default function Home() {
               </button>
               {!user?.isVerified && (
                 <button
-                  className="w-full cursor-pointer bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-amber-500/50"
+                  className="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-amber-500/50 cursor-pointer disabled:cursor-not-allowed"
+                  disabled={isCounting || isLoading}
+                  style={{ opacity: isCounting ? 0.5 : 1 }}
                   onClick={handleResendVerification}
                 >
                   {isLoading
                     ? "Sending..."
-                    : "Resend Verification Email"}
+                    : isCounting
+                      ? `Resend email in ${formattedTime}`
+                      : "Resend Verification Email"}
                 </button>
               )}
             </div>

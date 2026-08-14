@@ -64,3 +64,44 @@ export const uploadMiddleware = (folderName: string) => {
     }
   })
 }
+
+// Note: Using in-memory Map for development.
+// Production should use Redis for distributed state
+// across multiple server instances.
+const cooldownMaps = {
+  verification: new Map<string, number>(),
+  passwordReset: new Map<string, number>()
+}
+
+// Check if a cooldown is still active for a given type and key. Returns isCooldown flag and remaining minutes if active.
+export const checkCooldown = (
+  type: keyof typeof cooldownMaps,
+  key: string,
+  cooldownTime: number
+) => {
+  const map = cooldownMaps[type]
+  const lastSentTime = map.get(key)
+  const now = Date.now()
+  if (lastSentTime && now - lastSentTime < cooldownTime) {
+    const remainingMinutes = Math.ceil(
+      (cooldownTime - (now - lastSentTime)) / 1000 / 60
+    )
+    const remainingSeconds = Math.ceil((cooldownTime - (Date.now() - lastSentTime)) / 1000);
+    return { isCooldown: true, remainingMinutes, remainingSeconds }
+  }
+  return { isCooldown: false }
+}
+
+// Setting the cooldown, and removing the current entry from the map when cooldown expires
+export const setCooldown = (
+  type: keyof typeof cooldownMaps,
+  key: string,
+  cooldownTime: number
+) => {
+  const map = cooldownMaps[type]
+  let date = Date.now()
+  map.set(key, date)
+  setTimeout(() => {
+    map.delete(key)
+  }, cooldownTime)
+}

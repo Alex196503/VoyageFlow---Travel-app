@@ -85,7 +85,7 @@ export default function ApiNav({
               <section className="w-full sm:w-auto flex items-center gap-3">
                 <a
                   href="/profile"
-                  className="flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
+                  className="flex-col md:flex-row flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
                 >
                   <img
                     src={user?.avatar}

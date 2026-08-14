@@ -57,3 +57,21 @@ export const LoginSchema = z.object({
       "Password must contain at least one letter and one number"
     )
 })
+
+export const ResetPasswordSchema = z
+  .object({
+    password: z
+      .string({ message: "The password is required" })
+      .min(6, "Password must be at least 6 characters long")
+      .regex(
+        /^(?=.*[A-Za-z])(?=.*\d).{6,}$/,
+        "Password must contain at least one letter and one number"
+      ),
+    confirmPassword: z.string({
+      message: "Confirm password is required"
+    })
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"]
+  })
