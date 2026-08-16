@@ -122,7 +122,7 @@ export class AuthService {
     }
     const result1 = await this.hasher.compare(
       password,
-      userFound?.password
+      userFound?.password as string
     )
     if (!result1) {
       throw new BadRequestError("Invalid email or password!")

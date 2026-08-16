@@ -1,0 +1,284 @@
+import { getMeta } from "~/helpers/helpers"
+import ApiNav from "../api/local_components/ApiNav"
+import {
+  useAuth,
+  useFormToast,
+  useThemeContext
+} from "~/custom-hooks/react-hooks"
+import { IoMoon, IoSunny } from "react-icons/io5"
+import { TextInput } from "../register/local_components/InputText"
+import { FileInput } from "../register/local_components/FileInput"
+import {
+  data,
+  Link,
+  useFetcher,
+  useLoaderData,
+  type LoaderFunctionArgs
+} from "react-router"
+import {
+  hasNoProfileChanges,
+  requireAuthOnServer
+} from "~/utils/frontend-utils"
+import type { Route } from "./+types"
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import { ToastContainer } from "react-toastify"
+import { EditProfileSchema } from "~/utils/validation/zod-validation"
+import axios from "axios"
+import { api } from "~/axios/axios"
+import {
+  type ProfileRouteResponse,
+  type AuthenticatedUser
+} from "~/types/types"
+export const meta = () => getMeta("Edit Profile page")
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAuthOnServer(request)
+  try {
+    const cookieHeaders = request.headers.get("cookie") || ""
+    const response = await api.get<ProfileRouteResponse>(
+      "/profile/",
+      {
+        headers: {
+          cookie: cookieHeaders
+        }
+      }
+    )
+    return {
+      success: response.data.success,
+      user: response.data.user
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverResponse = error.response?.data
+      if (serverResponse?.errors) {
+        return {
+          success: false,
+          message: serverResponse?.message || error.message
+        }
+      }
+      return {
+        success: false,
+        message: serverResponse?.message || error.message
+      }
+    }
+    return {
+      success: false,
+      message: "An unexpected error occurred while loading profile"
+    }
+  }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  let formData = await request.formData()
+  try {
+    const cookieHeader = request.headers.get("cookie") || ""
+
+    const response = await api.patch<{
+      success: boolean
+      message: string
+      user: AuthenticatedUser
+    }>("/profile/update", formData, {
+      headers: {
+        cookie: cookieHeader
+      }
+    })
+    return {
+      success: true,
+      message: response.data.message,
+      user: response.data.user
+    }
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      return {
+        success: false,
+        message:
+          (err.response?.data?.message as string) ||
+          "Failed to update profile"
+      }
+    }
+    return {
+      success: false,
+      message: "An unexpected error occurred"
+    }
+  }
+}
+
+export default function EditProfilePage() {
+  const data = useLoaderData<typeof loader>()
+  const { isDark, setDark } = useThemeContext()
+  const fetcher = useFetcher<ProfileRouteResponse>()
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const { user } = useAuth()
+  const [errors, setErrors] = useState<{
+    username?: string
+    email?: string
+    password?: string
+  } | null>(null)
+  useFormToast(fetcher.data, setErrors)
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const username = formData.get("username") as string
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const { shouldStop, message } = hasNoProfileChanges(
+      user?.name || "",
+      username,
+      user?.email || "",
+      email,
+      password,
+      selectedFile
+    )
+    if (shouldStop) {
+      toast.info(message)
+      return
+    }
+    const result = EditProfileSchema.safeParse({
+      username,
+      email,
+      password: password || undefined
+    })
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      setErrors({
+        username: fieldErrors.username?.[0],
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0]
+      })
+      return
+    }
+    setErrors(null)
+    fetcher.submit(formData, {
+      method: "POST",
+      encType: "multipart/form-data"
+    })
+  }
+
+  const editingFields = [
+    {
+      label: "username",
+      placeholder: "e.g: alex_traveler",
+      fieldType: "text"
+    },
+    {
+      label: "email",
+      placeholder: "name@example.com",
+      fieldType: "email"
+    },
+    { label: "avatar", fieldType: "file", accept: "image/*" },
+    {
+      label: "password",
+      placeholder: "••••••••",
+      fieldType: "password"
+    }
+  ]
+
+  return (
+    <>
+      <ApiNav
+        navTitle="Visit a new country"
+        bookingStatus="live"
+        bgColor={isDark ? "Dark" : "Light"}
+        setDark={setDark}
+        isDark={isDark}
+        user={user}
+      >
+        {isDark ? <IoMoon /> : <IoSunny />}
+      </ApiNav>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 font-sans">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+          <h2 className="mb-2 text-gray-900 text-2xl font-bold">
+            Update your profile
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">
+            Edit your personal information
+          </p>
+          <form
+            className="flex flex-col gap-5"
+            method="POST"
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+            key={data?.user?.email || "loading"}
+          >
+            {errors && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">
+                {typeof errors === "string" ? (
+                  <p>{errors}</p>
+                ) : (
+                  <ul className="list-disc pl-4 flex flex-col gap-1">
+                    {Object.entries(errors).map(
+                      ([field, message]) => {
+                        if (!message) return null
+                        return (
+                          <li key={field}>
+                            <span className="font-semibold capitalize">
+                              {field}:
+                            </span>{" "}
+                            {message}
+                          </li>
+                        )
+                      }
+                    )}
+                  </ul>
+                )}
+              </div>
+            )}
+            {editingFields.map((field) => {
+              if (field.fieldType === "file") {
+                return (
+                  <FileInput
+                    key={field.label}
+                    label={field.label}
+                    fieldType={field.fieldType}
+                    accept={field.accept as string}
+                    onFileSelect={(file) => setSelectedFile(file)}
+                    existingImageUrl={data?.user?.avatar}
+                  />
+                )
+              }
+
+              const initialValue =
+                field.label === "username"
+                  ? data.user?.name
+                  : field.label === "email"
+                    ? data.user?.email
+                    : ""
+
+              return (
+                <TextInput
+                  key={field.label}
+                  label={field.label}
+                  fieldType={field.fieldType}
+                  placeholder={field.placeholder}
+                  defaultValue={initialValue || ""}
+                />
+              )
+            })}
+            <button
+              type="submit"
+              className="mt-2.5 mb-4 py-3 bg-indigo-600 text-white rounded-lg text-base font-semibold cursor-pointer transition hover:bg-indigo-700 active:scale-[0.99]"
+            >
+              {fetcher.state === "submitting"
+                ? "Saving..."
+                : "Save your changes"}
+            </button>
+          </form>
+          <Link
+            to="/"
+            className="mt-4 text-center block px-10 py-2.5 bg-gray-400 hover:bg-gray-500 font-bold uppercase text-xs tracking-wider rounded-lg border border-slate-700 transition-all"
+          >
+            Go back
+          </Link>
+        </div>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        closeOnClick={true}
+      />
+    </>
+  )
+}

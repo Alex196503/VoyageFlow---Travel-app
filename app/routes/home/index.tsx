@@ -117,9 +117,13 @@ export default function Home() {
               Active Explorer
             </span>
             <div className="w-full flex flex-col gap-2 mt-2">
-              <button className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-slate-700/50">
-                View Profile
-              </button>
+              <a
+                href="/edit-profile"
+                className="w-full cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-slate-700/50"
+              >
+                Edit profile
+              </a>
+
               {!user?.isVerified && (
                 <button
                   className="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition-colors border border-amber-500/50 cursor-pointer disabled:cursor-not-allowed"

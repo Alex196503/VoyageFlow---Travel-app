@@ -31,7 +31,7 @@ export default function LoginPage() {
           </p>
         </section>
 
-        <Form
+        <form
           className="flex flex-col gap-y-5"
           method="post"
           noValidate
@@ -86,7 +86,7 @@ export default function LoginPage() {
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
-        </Form>
+        </form>
 
         <section className="flex flex-col gap-y-2 justify-center items-center w-full mt-8 pt-6 border-t border-slate-800/80">
           <p className="text-xs text-slate-400">

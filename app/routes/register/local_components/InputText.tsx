@@ -5,7 +5,8 @@ export const TextInput = ({
   fieldType,
   placeholder,
   minLength = 2,
-  maxLength = 50
+  maxLength = 50,
+  defaultValue
 }: InputProps) => {
   return (
     <section className="flex flex-col gap-y-2">
@@ -23,6 +24,7 @@ export const TextInput = ({
           minLength={minLength}
           maxLength={maxLength}
           placeholder={placeholder}
+          defaultValue={defaultValue}
           className="form-input"
         />
       </div>

@@ -4,7 +4,7 @@ import {
   type Response
 } from "express"
 import express from "express"
-import { prisma } from "../../prisma/prisma"
+import { prisma } from "../../../prisma/prisma"
 import sendEmailNotification from "~/nodemailer-config"
 import { type RegisterResponse } from "~/types/types"
 import { ResetPasswordSchema } from "~/utils/validation/zod-validation"
