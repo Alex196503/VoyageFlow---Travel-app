@@ -1,4 +1,4 @@
-import { Form, type LoaderFunctionArgs } from "react-router"
+import { type LoaderFunctionArgs } from "react-router"
 import { TextInput } from "./local_components/InputText"
 import { useAuthSubmit } from "~/custom-hooks/react-hooks"
 import { RegisterSchema } from "~/utils/validation/zod-validation"
@@ -75,7 +75,7 @@ export default function Register() {
             </p>
           </section>
 
-          <Form
+          <form
             className="flex flex-col gap-y-5"
             noValidate
             onSubmit={handleSubmit}
@@ -137,7 +137,7 @@ export default function Register() {
             >
               {loading ? "Registering..." : "Register"}
             </button>
-          </Form>
+          </form>
           <section className="flex justify-between gap-y-10 items-center w-full mt-5">
             <p className="text-center text-xs text-slate-400">
               Already have an account?

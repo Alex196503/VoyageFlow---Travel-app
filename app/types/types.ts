@@ -32,6 +32,8 @@ export type InputProps = {
   placeholder?: string
   minLength?: number
   maxLength?: number
+  defaultValue?: string
+  existingImageUrl?: string
 }
 
 export type InputFile = InputProps & {
@@ -81,4 +83,26 @@ export type ExpressErrorResponse = {
     password?: string
     confirmPassword?: string
   }
+}
+
+export type ProfileRouteResponse = {
+  success: boolean
+  message: string
+  user?: {
+    name: string
+    email: string
+    avatar: string
+  }
+  errors?: {
+    username?: string[]
+    email?: string[]
+    password?: string[]
+  }
+}
+
+export type UpdateProfileInput = {
+  username?: string
+  email?: string
+  password?: string
+  avatarFile?: string
 }

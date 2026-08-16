@@ -75,3 +75,19 @@ export const ResetPasswordSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"]
   })
+
+export const EditProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email format"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(
+      /^(?=.*[A-Za-z])(?=.*\d).{6,}$/,
+      "Password must contain at least one letter and one number"
+    )
+    .optional()
+    .or(z.literal(""))
+})

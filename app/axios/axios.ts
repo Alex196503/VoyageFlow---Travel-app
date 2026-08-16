@@ -45,6 +45,7 @@ api.interceptors.response.use(
     if (error?.response?.status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true
       try {
+        const cookieHeader = originalRequest.headers?.cookie || ""
         const res = await api.post<{
           accessToken: string
           user: {
@@ -52,7 +53,15 @@ api.interceptors.response.use(
             name: string
             email: string
           }
-        }>("/auth/refresh")
+        }>(
+          "/auth/refresh",
+          {},
+          {
+            headers: {
+              cookie: cookieHeader
+            }
+          }
+        )
         const newAccessToken = res.data.accessToken
         accessTokenStorage.setAccessToken(newAccessToken)
         originalRequest!.headers.Authorization = `Bearer ${newAccessToken}`

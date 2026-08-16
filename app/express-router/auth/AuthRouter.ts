@@ -7,7 +7,7 @@ import crypto from "crypto"
 import {
   AuthService,
   JwtTokenService
-} from "../server/auth/AuthService"
+} from "../../server/auth/AuthService"
 import {
   BCryptHasher,
   SHA256TokenCrypto
@@ -16,9 +16,9 @@ import {
   BadRequestError,
   UnauthorizedError
 } from "~/server/auth/custom-errors"
-import type { RegisterResponse } from "../types/types"
+import type { RegisterResponse } from "../../types/types"
 import express from "express"
-import { prisma } from "../../prisma/prisma"
+import { prisma } from "../../../prisma/prisma"
 import {
   FileValidationSchema,
   LoginSchema,

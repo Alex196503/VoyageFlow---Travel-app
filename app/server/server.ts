@@ -1,15 +1,16 @@
 import express, { type Application, type NextFunction } from "express"
 import process from "process"
 import cors from "cors"
-import { AuthRouter } from "~/express-router/AuthRouter"
+import { AuthRouter } from "~/express-router/auth/AuthRouter"
 import cookieParser from "cookie-parser"
 import {
   globalErrorHandler,
   routeNotFoundHandler
 } from "~/utils/node-utils"
 import type { AuthenticatedUser } from "~/types/types"
-import { VerificationRouter } from "~/express-router/VerificationRouter"
-import { PasswordRouter } from "~/express-router/PasswordRouter"
+import { VerificationRouter } from "~/express-router/auth/VerificationRouter"
+import { PasswordRouter } from "~/express-router/auth/PasswordRouter"
+import { ProfileRouter } from "~/express-router/ProfileRouter"
 
 //Singleton pattern for server instance
 class Server {
@@ -51,6 +52,7 @@ server.useMiddleware(cookieParser())
 server.addRouter("/api/auth", AuthRouter)
 server.addRouter("/api/auth", VerificationRouter)
 server.addRouter("/api/auth", PasswordRouter)
+server.addRouter("/api/profile", ProfileRouter)
 server.useMiddleware(routeNotFoundHandler)
 server.addMiddlewareError(globalErrorHandler)
 
