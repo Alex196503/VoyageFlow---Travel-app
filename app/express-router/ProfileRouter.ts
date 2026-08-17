@@ -90,6 +90,14 @@ ProfileRouter.patch(
       })
     }
     try {
+      if (req.aborted || req.socket.destroyed) {
+        console.log(
+          "Request cancelled by client, no longer saving into DB!"
+        )
+        return res
+          .status(499)
+          .json({ message: "Request cancelled by client" })
+      }
       let userFound = await prisma.user.findUnique({
         where: { id: Number(userId) }
       })

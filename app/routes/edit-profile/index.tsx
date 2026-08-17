@@ -9,10 +9,8 @@ import { IoMoon, IoSunny } from "react-icons/io5"
 import { TextInput } from "../register/local_components/InputText"
 import { FileInput } from "../register/local_components/FileInput"
 import {
-  data,
   Link,
   useFetcher,
-  useLoaderData,
   type LoaderFunctionArgs
 } from "react-router"
 import {
@@ -73,7 +71,6 @@ export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData()
   try {
     const cookieHeader = request.headers.get("cookie") || ""
-
     const response = await api.patch<{
       success: boolean
       message: string
@@ -81,7 +78,8 @@ export async function action({ request }: Route.ActionArgs) {
     }>("/profile/update", formData, {
       headers: {
         cookie: cookieHeader
-      }
+      },
+      signal: request.signal
     })
     return {
       success: true,
@@ -96,6 +94,11 @@ export async function action({ request }: Route.ActionArgs) {
           (err.response?.data?.message as string) ||
           "Failed to update profile"
       }
+    } else if (axios.isCancel(err)) {
+      return {
+        success: false,
+        message: "Request cancelled!"
+      }
     }
     return {
       success: false,
@@ -105,18 +108,39 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function EditProfilePage() {
-  const data = useLoaderData<typeof loader>()
   const { isDark, setDark } = useThemeContext()
   const fetcher = useFetcher<ProfileRouteResponse>()
+  const { user } = useAuth()
+  const [defaultName, setName] = useState(user?.name || "")
+  const [email, setEmail] = useState(user?.email || "")
+  const [avatar, setAvatar] = useState(user?.avatar || "")
+  const [formKey, setFormKey] = useState(0)
+  const resetChanges = () => {
+    if (user) {
+      setName(user.name || "")
+      setEmail(user.email || "")
+      setAvatar((user.avatar as string) || "")
+      setSelectedFile(null)
+      setErrors(null)
+      setFormKey((prev) => prev + 1)
+    }
+  }
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const { user } = useAuth()
   const [errors, setErrors] = useState<{
     username?: string
     email?: string
     password?: string
   } | null>(null)
   useFormToast(fetcher.data, setErrors)
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "")
+      setEmail(user.email || "")
+      setAvatar((user.avatar as string) || "")
+    }
+  }, [user])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -201,7 +225,7 @@ export default function EditProfilePage() {
             method="POST"
             onSubmit={handleSubmit}
             encType="multipart/form-data"
-            key={data?.user?.email || "loading"}
+            key={formKey}
           >
             {errors && (
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">
@@ -235,16 +259,16 @@ export default function EditProfilePage() {
                     fieldType={field.fieldType}
                     accept={field.accept as string}
                     onFileSelect={(file) => setSelectedFile(file)}
-                    existingImageUrl={data?.user?.avatar}
+                    existingImageUrl={avatar}
                   />
                 )
               }
 
               const initialValue =
                 field.label === "username"
-                  ? data.user?.name
+                  ? defaultName
                   : field.label === "email"
-                    ? data.user?.email
+                    ? email
                     : ""
 
               return (
@@ -266,6 +290,25 @@ export default function EditProfilePage() {
                 : "Save your changes"}
             </button>
           </form>
+          <button
+            type="button"
+            className="mt-2.5 mb-4 py-3 block w-full bg-orange-300 text-white rounded-lg text-base font-semibold cursor-pointer transition hover:bg-orange-500 active:scale-[0.99]"
+            onClick={resetChanges}
+          >
+            Reset changes
+          </button>
+          {fetcher.state === "submitting" && (
+            <button
+              type="button"
+              className="mt-2.5 mb-4 py-3 block w-full bg-red-300 text-white rounded-lg text-base font-semibold cursor-pointer transition hover:bg-red-500 active:scale-[0.99]"
+              onClick={() => {
+                fetcher.reset()
+                toast?.info("Request cancelled!")
+              }}
+            >
+              Cancel changes
+            </button>
+          )}
           <Link
             to="/"
             className="mt-4 text-center block px-10 py-2.5 bg-gray-400 hover:bg-gray-500 font-bold uppercase text-xs tracking-wider rounded-lg border border-slate-700 transition-all"
