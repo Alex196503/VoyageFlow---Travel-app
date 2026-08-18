@@ -66,7 +66,6 @@ export default function DefaultPage() {
       <ApiNav
         user={user}
         navTitle="Where in the world?"
-        bookingStatus="live"
         bgColor={isDark ? "Dark" : "Light"}
         setDark={setDark}
         isDark={isDark}

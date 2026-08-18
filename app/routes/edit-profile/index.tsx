@@ -204,7 +204,6 @@ export default function EditProfilePage() {
     <>
       <ApiNav
         navTitle="Visit a new country"
-        bookingStatus="live"
         bgColor={isDark ? "Dark" : "Light"}
         setDark={setDark}
         isDark={isDark}

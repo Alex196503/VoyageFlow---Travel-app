@@ -1,4 +1,4 @@
-import { redirect } from "react-router"
+import { redirect, type SetURLSearchParams } from "react-router"
 import { api } from "~/axios/axios"
 
 class AccessTokenFrontend {
@@ -90,4 +90,34 @@ export const hasNoProfileChanges = (
     }
   }
   return { hasChanges: true, shouldStop: false }
+}
+
+//Updates, adds, or removes a query parameter in the URL search params. If a value is provided, it sets or updates the parameter. If the value is empty, it deletes the parameter from the URL.
+export const handleParamChange = (
+  key: string,
+  value: string,
+  setSearchParams: SetURLSearchParams
+) => {
+  setSearchParams((prev) => {
+    if (value) {
+      prev.set(key, value)
+      prev.set("page", "1")
+    } else {
+      prev.delete(key)
+    }
+    return prev
+  })
+}
+
+//Handler function that sanitizes the value introduced by the user in the price input
+export const sanitizePriceValue = (value: string) => {
+  if (!value) return ""
+  const numericOnly = value.replace(/[^0-9]/g, "")
+  if (!numericOnly) return ""
+  const num = Number(numericOnly)
+  const ABSOLUTE_MAX_PRICE = 10000
+  if (num > ABSOLUTE_MAX_PRICE) {
+    return ABSOLUTE_MAX_PRICE.toString()
+  }
+  return num.toString()
 }

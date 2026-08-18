@@ -5,7 +5,6 @@ import {
 } from "express"
 import { prisma } from "../../prisma/prisma"
 import express from "express"
-import bcrypt from "bcrypt"
 import { authentificationMiddleware } from "~/middleware/authMiddleware"
 import type { ProfileRouteResponse } from "~/types/types"
 import {
