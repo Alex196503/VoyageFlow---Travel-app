@@ -56,7 +56,6 @@ export default function Home() {
     <>
       <ApiNav
         navTitle="Visit a new country"
-        bookingStatus="live"
         bgColor={isDark ? "Dark" : "Light"}
         setDark={setDark}
         isDark={isDark}
@@ -80,7 +79,7 @@ export default function Home() {
               href="/trips"
               className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/20"
             >
-              Get Started
+              View trips
             </a>
           </div>
         </section>

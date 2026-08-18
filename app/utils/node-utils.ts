@@ -9,6 +9,7 @@ import {
 import multer from "multer"
 import { cloudinaryVar } from "../cloudinary-config"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
+import { prisma } from "../../prisma/prisma"
 
 //Handler that fetches and parses the raw countries dataset(SERVER-ONLY HANDLER). Isolated inside this node-utils file to make sure Node.js modules are never bundled into the client code.
 const filePath = path.join(process.cwd(), "data.json")
@@ -86,7 +87,9 @@ export const checkCooldown = (
     const remainingMinutes = Math.ceil(
       (cooldownTime - (now - lastSentTime)) / 1000 / 60
     )
-    const remainingSeconds = Math.ceil((cooldownTime - (Date.now() - lastSentTime)) / 1000);
+    const remainingSeconds = Math.ceil(
+      (cooldownTime - (Date.now() - lastSentTime)) / 1000
+    )
     return { isCooldown: true, remainingMinutes, remainingSeconds }
   }
   return { isCooldown: false }

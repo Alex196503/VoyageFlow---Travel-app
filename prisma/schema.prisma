@@ -26,3 +26,40 @@ model User{
   email_verification_token String? @db.Text
   email_verification_token_expires_at DateTime?
 }
+
+enum TripCategory {
+  ADVENTURE
+  CITY_BREAK
+  BEACH
+  MOUNTAIN
+  CULTURAL
+  CRUISE
+}
+
+model Trip {
+  id Int @id @default(autoincrement())
+  title String @db.VarChar(255)
+  country_code String @db.VarChar(10)
+  price Decimal @db.Decimal(10, 2)
+  total_seats Int
+  available_seats Int
+  category TripCategory
+  description      String       @db.Text
+  start_date       DateTime     @db.Timestamp(0)
+  end_date         DateTime     @db.Timestamp(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  images           Image[]
+  @@map("trips")
+}
+
+model Image {
+  id  Int     @id @default(autoincrement())
+  trip_id   Int
+  url       String  @db.VarChar(255)
+  is_cover  Boolean @default(false)
+  trip      Trip    @relation(fields: [trip_id], references: [id], onDelete: Cascade)
+  
+  @@index([trip_id])
+  @@map("images")
+}

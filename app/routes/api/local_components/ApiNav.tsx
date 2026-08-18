@@ -1,12 +1,11 @@
 import axios from "axios"
 import type { ReactNode } from "react"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { api } from "~/axios/axios"
 import { useAuth } from "~/custom-hooks/react-hooks"
 
 export default function ApiNav({
   navTitle,
-  bookingStatus,
   children,
   bgColor,
   isDark,
@@ -14,7 +13,6 @@ export default function ApiNav({
   user
 }: {
   navTitle: string
-  bookingStatus: string
   children: ReactNode
   isDark: boolean
   bgColor: string
@@ -62,29 +60,24 @@ export default function ApiNav({
   return (
     <>
       <nav className="w-full flex flex-col md:flex-row justify-between items-center gap-4 px-6 md:px-16 py-4 bg-white dark:bg-brand-blue-900 transition-colors border-b border-brand-grey-400/20 dark:border-white/10">
-        <div className="w-full md:w-auto flex justify-between items-center">
-          <h3 className="text-2xl font-bold py-2 md:py-5">
-            {navTitle}
-          </h3>
-          <div className="flex sm:hidden items-center gap-x-2 bg-brand-grey-50 dark:bg-brand-blue-950 px-3 py-1.5 rounded-full border border-brand-grey-400/10">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-brand-grey-400 dark:text-white/70">
-              {bookingStatus}
-            </span>
-          </div>
-        </div>
-        <div className="hidden sm:flex items-center gap-x-2 bg-brand-grey-50 dark:bg-brand-blue-950 px-3 py-1.5 rounded-full border border-brand-grey-400/10">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-brand-grey-400 dark:text-white/70">
-            Booking {bookingStatus}
+        <h3 className="text-2xl font-bold py-2 md:py-5">
+          {navTitle}
+        </h3>
+        <Link
+          to="/countries"
+          className="text-sm md:text-base font-medium text-blue-600 hover:underline hover:text-blue-900 flex items-center gap-1 group"
+        >
+          <span>View information about countries in our API</span>
+          <span className="transition-transform group-hover:translate-x-1">
+            →
           </span>
-        </div>
+        </Link>
         <div className="w-full md:w-auto flex flex-col sm:flex-row items-center justify-between md:justify-end gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-brand-grey-400/10 dark:border-white/10">
           <div className="w-full sm:w-auto grid grid-cols-2 gap-2">
             {user ? (
               <section className="w-full sm:w-auto flex items-center gap-3">
                 <a
-                  href="/profile"
+                  href="/edit-profile"
                   className="flex-col md:flex-row flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
                 >
                   <img
