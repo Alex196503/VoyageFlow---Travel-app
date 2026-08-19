@@ -3,9 +3,6 @@ import type { Route } from "./+types"
 import type { TripsResponse } from "~/types/types"
 import axios from "axios"
 import { useLoaderData, useSearchParams } from "react-router"
-import ApiNav from "../api/local_components/ApiNav"
-import { useAuth, useThemeContext } from "~/custom-hooks/react-hooks"
-import { IoMoon, IoSearch, IoSunny } from "react-icons/io5"
 import { TripCard } from "./local_components/TripCard"
 import { GeneralDropdown } from "./local_components/GeneralDropdown"
 import { getMeta } from "~/helpers/helpers"
@@ -15,6 +12,7 @@ import {
 } from "~/utils/frontend-utils"
 import { CountryCodeSearcher } from "./local_components/CountryCodeSearcher"
 import { RangeInput } from "./local_components/RangeInput"
+import { SortDropdown } from "./local_components/SortDropdown"
 
 export const meta = () =>
   getMeta(
@@ -31,6 +29,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const minPrice = url.searchParams.get("minPrice") || ""
     const maxPrice = url.searchParams.get("maxPrice") || ""
     const page = url.searchParams.get("page") || ""
+    const sort = url.searchParams.get("sort") || ""
     const response = await api.get<{
       formattedTrips: TripsResponse
       totalPages: number
@@ -40,7 +39,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
         ...(search ? { search } : {}),
         ...(minPrice ? { minPrice } : {}),
         ...(maxPrice ? { maxPrice } : {}),
-        ...(page ? { page } : {})
+        ...(page ? { page } : {}),
+        ...(sort ? { sort } : {})
       }
     })
     return {
@@ -61,14 +61,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 }
 export default function TripPage() {
   let data = useLoaderData<typeof loader>()
-  const { isDark, setDark } = useThemeContext()
-  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const currentSearch = searchParams.get("search") || ""
   const currentMinPrice = searchParams.get("minPrice") || ""
   const currentMaxPrice = searchParams.get("maxPrice") || ""
   const page = Number(searchParams.get("page")) || 1
-
   const goToPage = (newPage: number) => {
     setSearchParams((prev) => {
       prev.set("page", newPage.toString())
@@ -77,23 +74,14 @@ export default function TripPage() {
   }
   return (
     <>
-      <ApiNav
-        navTitle="Where in the world?"
-        bgColor={isDark ? "Dark" : "Light"}
-        setDark={setDark}
-        isDark={isDark}
-        user={user}
-      >
-        {isDark ? <IoMoon /> : <IoSunny />}
-      </ApiNav>
       <div className="w-full min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <section className="flex flex-col md:flex-row justify-center w-full items-center gap-y-4 md:gap-y-1 md:justify-between">
             <div className="flex flex-col gap-y-1">
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Explore Our Available Trips
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 md:mr-3">
                 Find your next unforgettable adventure around the
                 world.
               </p>
@@ -130,9 +118,35 @@ export default function TripPage() {
                   )
                 }
               />
+              <div className="relative inline-block w-full sm:w-44">
+                <SortDropdown
+                  searchParams={searchParams}
+                  setSearchParams={setSearchParams}
+                  options={[
+                    { label: "Newest first", value: "newest" },
+                    { label: "Price: Low to High", value: "asc" },
+                    { label: "Price: High to Low", value: "desc" }
+                  ]}
+                />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                    />
+                  </svg>
+                </div>
+              </div>
               <div className="flex items-center gap-2 w-full justify-center sm:w-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm">
                 <span className="text-xs text-slate-400 font-medium">
-                  Price (in $):
+                  Price (in €):
                 </span>
                 <RangeInput
                   min={0}
@@ -158,7 +172,8 @@ export default function TripPage() {
             {(searchParams.get("category") ||
               searchParams.get("search") ||
               searchParams.get("minPrice") ||
-              searchParams.get("maxPrice")) && (
+              searchParams.get("maxPrice") ||
+              searchParams.get("sort")) && (
               <button
                 className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium self-center md:self-auto cursor-pointer"
                 onClick={() => setSearchParams({})}

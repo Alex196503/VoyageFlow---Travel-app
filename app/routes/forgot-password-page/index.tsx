@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
   let isLoading = navigate.state === "submitting"
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12">
+    <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12">
       <div className="w-full max-w-md space-y-3 bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl text-white">
         <h3 className="text-xl font-semibold tracking-tight text-white">
           Find your account
@@ -105,6 +105,6 @@ export default function ForgotPasswordPage() {
         autoClose={3000}
         closeOnClick={true}
       />
-    </section>
+    </main>
   )
 }

@@ -39,7 +39,7 @@ export default function Register() {
     RegisterSchema
   )
   return (
-    <div className="text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+    <main className="text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
       <div className="w-full max-w-4xl bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
         <article className="relative hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white overflow-hidden">
           <section className="bg-spot"></section>
@@ -151,6 +151,6 @@ export default function Register() {
           </section>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

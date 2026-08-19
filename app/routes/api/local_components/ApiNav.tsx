@@ -1,6 +1,6 @@
 import axios from "axios"
 import type { ReactNode } from "react"
-import { Link, useNavigate } from "react-router"
+import { Link, useLocation, useNavigate } from "react-router"
 import { api } from "~/axios/axios"
 import { useAuth } from "~/custom-hooks/react-hooks"
 
@@ -27,6 +27,8 @@ export default function ApiNav({
     | undefined
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const isCountriesApiPage = location.pathname === "/countries"
   const { setUser, setAccessToken } = useAuth()
   const logOutUser = async () => {
     try {
@@ -64,10 +66,14 @@ export default function ApiNav({
           {navTitle}
         </h3>
         <Link
-          to="/countries"
+          to={isCountriesApiPage ? "/trips" : "countries"}
           className="text-sm md:text-base font-medium text-blue-600 hover:underline hover:text-blue-900 flex items-center gap-1 group"
         >
-          <span>View information about countries in our API</span>
+          <span>
+            {isCountriesApiPage
+              ? "View our offer for you traveller"
+              : "View information about countries in our API"}
+          </span>
           <span className="transition-transform group-hover:translate-x-1">
             →
           </span>

@@ -1,6 +1,3 @@
-import { IoMoon } from "react-icons/io5"
-import { IoSunny } from "react-icons/io5"
-import ApiNav from "~/routes/api/local_components/ApiNav"
 import { IoSearch } from "react-icons/io5"
 import { Link } from "react-router"
 import CountryFinder from "~/routes/api/local_components/CountryFinder"
@@ -113,15 +110,6 @@ export default function ApiPage() {
 
   return (
     <>
-      <ApiNav
-        navTitle="Where in the world?"
-        bgColor={isDark ? "Dark" : "Light"}
-        setDark={setDark}
-        isDark={isDark}
-        user={user}
-      >
-        {isDark ? <IoMoon /> : <IoSunny />}
-      </ApiNav>
       <main className="w-full px-6 md:px-16 py-8">
         <section className="w-full flex flex-col md:flex-row justify-between items-stretch md:items-center gap-6">
           <CountryFinder

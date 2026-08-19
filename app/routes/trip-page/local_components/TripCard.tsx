@@ -1,3 +1,4 @@
+import { Link } from "react-router"
 import { type TripWithImages } from "~/types/types"
 export const TripCard = ({
   title,
@@ -74,17 +75,22 @@ export const TripCard = ({
           </section>
 
           <section className="flex items-center gap-2">
-            <a
-              href="/trips/1"
+            <Link
+              to={`${id}`}
               className="px-3 py-2 text-xs font-medium rounded-xl text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               View Details
-            </a>
+            </Link>
             <button
               type="button"
-              className="px-4 py-2 text-xs font-medium rounded-xl text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-sm shadow-indigo-500/20 transition-all active:scale-95 cursor-pointer"
+              disabled={available_seats <= 0}
+              className={`px-4 py-2 text-xs font-medium rounded-xl transition-all shadow-sm ${
+                available_seats <= 0
+                  ? "bg-zinc-300 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed shadow-none line-through"
+                  : "text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-indigo-500/20 active:scale-95 cursor-pointer"
+              }`}
             >
-              Book Now
+              {available_seats <= 0 ? "Sold Out" : "Book Now"}
             </button>
           </section>
         </div>
