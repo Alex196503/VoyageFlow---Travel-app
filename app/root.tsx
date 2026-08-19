@@ -18,6 +18,8 @@ import type {
 import axios from "axios"
 import { api } from "./axios/axios"
 import { accessTokenStorage } from "./utils/frontend-utils"
+import ApiNav from "./routes/api/local_components/ApiNav"
+import { IoMoon, IoSunny } from "react-icons/io5"
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -55,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             id: number
             email: string
             name: string
-            avatar: string,
+            avatar: string
             isVerified?: boolean
           }
         }>("/auth/refresh")
@@ -105,6 +107,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Links />
           </head>
           <body className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
+            <ApiNav
+              navTitle="Visit a new country"
+              user={user}
+              isDark={isDark}
+              setDark={setDark}
+              bgColor={isDark ? "Dark" : "Light"}
+            >
+              {" "}
+              {isDark ? <IoMoon /> : <IoSunny />}{" "}
+            </ApiNav>
             {children}
             <ScrollRestoration />
             <Scripts />

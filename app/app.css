@@ -61,3 +61,9 @@ body {
 .btn-pagination {
   @apply px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
 }
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

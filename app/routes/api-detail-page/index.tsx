@@ -63,15 +63,6 @@ export default function DefaultPage() {
 
   return (
     <>
-      <ApiNav
-        user={user}
-        navTitle="Where in the world?"
-        bgColor={isDark ? "Dark" : "Light"}
-        setDark={setDark}
-        isDark={isDark}
-      >
-        <IoMoon />
-      </ApiNav>
       <main className="w-full px-6 md:px-22 py-8">
         <Link
           to="/countries"

@@ -1,5 +1,4 @@
 import { getMeta } from "~/helpers/helpers"
-import ApiNav from "../api/local_components/ApiNav"
 import {
   useAuth,
   useFormToast,
@@ -201,16 +200,7 @@ export default function EditProfilePage() {
   ]
 
   return (
-    <>
-      <ApiNav
-        navTitle="Visit a new country"
-        bgColor={isDark ? "Dark" : "Light"}
-        setDark={setDark}
-        isDark={isDark}
-        user={user}
-      >
-        {isDark ? <IoMoon /> : <IoSunny />}
-      </ApiNav>
+    <main className="w-full py-3">
       <div className="flex justify-center items-center min-h-screen bg-gray-50 font-sans">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
           <h2 className="mb-2 text-gray-900 text-2xl font-bold">
@@ -321,6 +311,6 @@ export default function EditProfilePage() {
         autoClose={5000}
         closeOnClick={true}
       />
-    </>
+    </main>
   )
 }

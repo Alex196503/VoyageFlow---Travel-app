@@ -14,7 +14,7 @@ export default function LoginPage() {
     LoginSchema
   )
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
+    <main className="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
       <section className="bg-first-spot-login"></section>
       <section className="bg-second-spot-login"></section>
 
@@ -109,6 +109,6 @@ export default function LoginPage() {
           </p>
         </section>
       </div>
-    </div>
+    </main>
   )
 }

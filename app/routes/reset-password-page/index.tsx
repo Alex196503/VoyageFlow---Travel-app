@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
       ? actionData.errors
       : undefined
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12 text-white">
+    <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12 text-white">
       <div className="w-full max-w-md space-y-6 bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
         <div className="space-y-2">
           <h3 className="text-xl font-semibold tracking-tight text-white">
@@ -167,6 +167,6 @@ export default function ResetPasswordPage() {
         autoClose={5000}
         closeOnClick={true}
       />
-    </section>
+    </main>
   )
 }
