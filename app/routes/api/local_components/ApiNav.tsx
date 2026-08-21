@@ -2,7 +2,7 @@ import axios from "axios"
 import type { ReactNode } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 import { api } from "~/axios/axios"
-import { useAuth } from "~/custom-hooks/react-hooks"
+import { useAuth, useModalBooking } from "~/custom-hooks/react-hooks"
 
 export default function ApiNav({
   navTitle,
@@ -28,7 +28,10 @@ export default function ApiNav({
 }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { setModalBookingsOpen, isModalBookingsOpen } =
+    useModalBooking()
   const isCountriesApiPage = location.pathname === "/countries"
+  const isOnTripsPage = location.pathname.startsWith("/trips")
   const { setUser, setAccessToken } = useAuth()
   const logOutUser = async () => {
     try {
@@ -79,12 +82,22 @@ export default function ApiNav({
           </span>
         </Link>
         <div className="w-full md:w-auto flex flex-col sm:flex-row items-center justify-between md:justify-end gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-brand-grey-400/10 dark:border-white/10">
-          <div className="w-full sm:w-auto grid grid-cols-2 gap-2">
+          {user && isOnTripsPage && (
+            <button
+              onClick={() => {
+                setModalBookingsOpen((prev) => !prev)
+              }}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-all shadow-md shadow-blue-500/20 cursor-pointer active:scale-[0.98]"
+            >
+              <span>🛒 My Bookings</span>
+            </button>
+          )}
+          <div className="w-full sm:w-auto  grid grid-cols-2 gap-2">
             {user ? (
               <section className="w-full sm:w-auto flex items-center gap-3">
                 <a
                   href="/edit-profile"
-                  className="flex-col md:flex-row flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
+                  className="flex-col md:flex-row flex items-center gap-3 px-2 py-1.5 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 transition-colors"
                 >
                   <img
                     src={user?.avatar}
@@ -128,7 +141,7 @@ export default function ApiNav({
             onClick={() => setDark(!isDark)}
           >
             {children}
-            <h3 className="text-base sm:text-xl font-medium">
+            <h3 className="text-base sm:text-[10px] font-medium">
               {bgColor} Mode
             </h3>
           </section>

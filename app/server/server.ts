@@ -12,6 +12,7 @@ import { VerificationRouter } from "~/express-router/auth/VerificationRouter"
 import { PasswordRouter } from "~/express-router/auth/PasswordRouter"
 import { ProfileRouter } from "~/express-router/ProfileRouter"
 import { TripRouter } from "~/express-router/TripRouter"
+import { BookingRouter } from "~/express-router/BookingRouter"
 
 //Singleton pattern for server instance
 class Server {
@@ -55,6 +56,7 @@ server.addRouter("/api/auth", VerificationRouter)
 server.addRouter("/api/auth", PasswordRouter)
 server.addRouter("/api/profile", ProfileRouter)
 server.addRouter("/api/trips", TripRouter)
+server.addRouter("/api/bookings", BookingRouter)
 server.useMiddleware(routeNotFoundHandler)
 server.addMiddlewareError(globalErrorHandler)
 

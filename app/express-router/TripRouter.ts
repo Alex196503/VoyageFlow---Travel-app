@@ -6,8 +6,17 @@ import {
 import { prisma } from "../../prisma/prisma"
 import express from "express"
 import { TripsService } from "~/server/TripsService"
+import type {
+  Image,
+  Trip,
+  TripCategory
+} from "../../generated/prisma/client"
 export const TripRouter = express.Router()
 export const tripService = new TripsService(prisma)
+export type TripWithImages = Trip & {
+  images: Image[]
+  category: TripCategory
+}
 
 TripRouter.get(
   "/",
@@ -60,7 +69,7 @@ TripRouter.get(
   "/:id",
   async (
     req: Request<{ id: string }>,
-    res: Response,
+    res: Response<{ trip: TripWithImages; message: string }>,
     next: NextFunction
   ) => {
     try {

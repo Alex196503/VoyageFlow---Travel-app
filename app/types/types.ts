@@ -26,6 +26,11 @@ export interface ThemeContextProps {
   setDark: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+export interface ModalContextProps {
+  isModalBookingsOpen: boolean
+  setModalBookingsOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
 export type InputProps = {
   label: string
   fieldType: string
@@ -134,3 +139,15 @@ export type TripWithImages = {
 }
 
 export type TripsResponse = TripWithImages[]
+
+export interface UserBookingRow {
+  booking_id: number
+  seats_booked: number
+  total_price: number | string
+  status: string
+  createdAt: Date
+  trip_id: number
+  trip_title: string
+  trip_price: number | string
+  cover_image_url: string | null
+}

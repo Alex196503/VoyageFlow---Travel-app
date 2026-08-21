@@ -8,9 +8,16 @@ import {
 import { api } from "~/axios/axios"
 import axios from "axios"
 import { Link, useLoaderData } from "react-router"
-import type { TripWithImages } from "~/types/types"
-import React, { useState } from "react"
+import type { TripWithImages, UserBookingRow } from "~/types/types"
+import React, { useEffect, useState } from "react"
 import { LightboxContainer } from "./local_components/LightboxContainer"
+import { BookingConfirmationModal } from "../trip-page/local_components/BookingConfirmationModal"
+import { ToastContainer } from "react-toastify"
+import {
+  useModalBooking,
+  useUserBookings
+} from "~/custom-hooks/react-hooks"
+import BookingCartModal from "../trip-page/local_components/BookingCartModal"
 export const meta = () =>
   getMeta(
     "Trip details page",
@@ -46,15 +53,20 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 export default function TripDetailPage() {
   let trip = useLoaderData<typeof loader>()
   const [activeImage, setActiveImage] = useState<string | null>(null)
+  const [isModalOpen, setModalOpen] = useState(false)
   const [previewUrl, setPreviewURL] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false)
+  const [currentNumberOfSeats, setCurrentNumberOfSeats] = useState(1)
+  const { isModalBookingsOpen, setModalBookingsOpen } =
+    useModalBooking()
 
   const openLightbox = (url: string, index: number) => {
     setActiveImage(url)
     setCurrentIndex(index)
     setIsLightBoxOpen(true)
   }
+
   const goNext = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!trip.images || trip.images.length === 0) return
@@ -63,6 +75,10 @@ export default function TripDetailPage() {
     setPreviewURL(trip?.images[nextIndex].url)
     setActiveImage(trip?.images[nextIndex].url)
   }
+
+  const { bookings, bookingsCounter, isLoading, error } =
+    useUserBookings(isModalBookingsOpen)
+
   const goPrev = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!trip.images || trip.images.length <= 0) return
@@ -72,6 +88,7 @@ export default function TripDetailPage() {
     setPreviewURL(trip?.images[prevIndex].url)
     setActiveImage(trip?.images[prevIndex].url)
   }
+
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold tracking-tight mb-6">
@@ -163,12 +180,13 @@ export default function TripDetailPage() {
               <section className="flex justify-between">
                 <span className="text-zinc-500">Group size:</span>
                 <span className="font-medium">
-                  Max {trip.total_seats} people
+                  Max {trip.available_seats} people
                 </span>
               </section>
             </div>
             <button
               disabled={trip.available_seats <= 0}
+              onClick={() => setModalOpen(true)}
               className={`w-full py-3 px-4 font-medium rounded-xl shadow-lg transition-all duration-200 ${
                 trip.available_seats <= 0
                   ? "bg-zinc-300 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed shadow-none line-through"
@@ -199,6 +217,29 @@ export default function TripDetailPage() {
           activeImage={activeImage}
           goNext={goNext}
           goPrev={goPrev}
+        />
+      )}
+      {isModalOpen && (
+        <BookingConfirmationModal
+          id={trip.id}
+          price={trip.price}
+          setCurrentNumberOfSeats={setCurrentNumberOfSeats}
+          setModalOpen={setModalOpen}
+          available_seats={trip.available_seats}
+          currentNumberOfSeats={currentNumberOfSeats}
+        />
+      )}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        closeOnClick={true}
+      />
+      {isModalBookingsOpen && (
+        <BookingCartModal
+          setModalBookingsOpen={setModalBookingsOpen}
+          bookings={bookings}
+          isLoading={isLoading}
+          bookingCounter={bookingsCounter}
         />
       )}
     </main>

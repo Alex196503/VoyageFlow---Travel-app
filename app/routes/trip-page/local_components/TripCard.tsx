@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { Link } from "react-router"
 import { type TripWithImages } from "~/types/types"
+import { BookingConfirmationModal } from "./BookingConfirmationModal"
 export const TripCard = ({
   title,
   category,
@@ -13,6 +15,8 @@ export const TripCard = ({
   id,
   images
 }: TripWithImages) => {
+  const [isModalOpen, setModalOpen] = useState(false)
+  const [currentNumberOfSeats, setCurrentNumberOfSeats] = useState(1)
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col justify-between transition-all hover:shadow-md">
       <section className="relative h-52 w-full bg-slate-200 dark:bg-slate-800">
@@ -55,13 +59,13 @@ export const TripCard = ({
           <div className="flex justify-between font-medium">
             <span>Total seats: {total_seats}</span>
             <span
-              className={`${total_seats > 0 ? `text-emerald-600 dark:text-emerald-400` : `text-red-500 dark:text-red-700`}`}
+              className={`${available_seats > 0 ? `text-emerald-600 dark:text-emerald-400` : `text-red-500 dark:text-red-700`}`}
             >
-              {total_seats > 0 ? "Available" : "Unavailable"}
+              {available_seats > 0 ? "Available" : "Unavailable"}
             </span>
           </div>
         </article>
-        <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80">
+        <article className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80">
           <section className="flex flex-col gap-y-1">
             <span className="text-xs text-slate-400 block">
               Price
@@ -83,6 +87,7 @@ export const TripCard = ({
             </Link>
             <button
               type="button"
+              onClick={() => setModalOpen(true)}
               disabled={available_seats <= 0}
               className={`px-4 py-2 text-xs font-medium rounded-xl transition-all shadow-sm ${
                 available_seats <= 0
@@ -93,8 +98,18 @@ export const TripCard = ({
               {available_seats <= 0 ? "Sold Out" : "Book Now"}
             </button>
           </section>
-        </div>
+        </article>
       </div>
+      {isModalOpen && (
+        <BookingConfirmationModal
+          id={id}
+          price={price}
+          setCurrentNumberOfSeats={setCurrentNumberOfSeats}
+          setModalOpen={setModalOpen}
+          available_seats={available_seats}
+          currentNumberOfSeats={currentNumberOfSeats}
+        />
+      )}
     </div>
   )
 }
