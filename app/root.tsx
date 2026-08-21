@@ -9,7 +9,11 @@ import {
 
 import type { Route } from "./+types/root"
 import "./app.css"
-import { AuthContext, ThemeContext } from "./react-contexts/context"
+import {
+  AuthContext,
+  ModalContext,
+  ThemeContext
+} from "./react-contexts/context"
 import { useEffect, useState } from "react"
 import type {
   AuthContextProps,
@@ -37,6 +41,7 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [isDark, setDark] = useState(false)
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [isModalBookingsOpen, setModalBookingsOpen] = useState(false)
   const [user, setUser] = useState<AuthContextProps["user"] | null>(
     null
   )
@@ -96,32 +101,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <AuthContext.Provider
         value={{ accessToken, setAccessToken, user, setUser }}
       >
-        <html lang="en" className={isDark ? "dark" : ""}>
-          <head>
-            <meta charSet="utf-8" />
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1"
-            />
-            <Meta />
-            <Links />
-          </head>
-          <body className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
-            <ApiNav
-              navTitle="Visit a new country"
-              user={user}
-              isDark={isDark}
-              setDark={setDark}
-              bgColor={isDark ? "Dark" : "Light"}
-            >
-              {" "}
-              {isDark ? <IoMoon /> : <IoSunny />}{" "}
-            </ApiNav>
-            {children}
-            <ScrollRestoration />
-            <Scripts />
-          </body>
-        </html>
+        <ModalContext.Provider
+          value={{ setModalBookingsOpen, isModalBookingsOpen }}
+        >
+          <html lang="en" className={isDark ? "dark" : ""}>
+            <head>
+              <meta charSet="utf-8" />
+              <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1"
+              />
+              <Meta />
+              <Links />
+            </head>
+            <body className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
+              <ApiNav
+                navTitle="Visit a new country"
+                user={user}
+                isDark={isDark}
+                setDark={setDark}
+                bgColor={isDark ? "Dark" : "Light"}
+              >
+                {" "}
+                {isDark ? <IoMoon /> : <IoSunny />}{" "}
+              </ApiNav>
+              {children}
+              <ScrollRestoration />
+              <Scripts />
+            </body>
+          </html>
+        </ModalContext.Provider>
       </AuthContext.Provider>
     </ThemeContext.Provider>
   )

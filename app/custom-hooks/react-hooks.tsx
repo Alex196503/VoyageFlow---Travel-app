@@ -3,8 +3,15 @@ import { useContext } from "react"
 import { useNavigate } from "react-router"
 import axios from "axios"
 import { api } from "~/axios/axios"
-import { type RegisterResponse } from "~/types/types"
-import { AuthContext, ThemeContext } from "~/react-contexts/context"
+import {
+  type RegisterResponse,
+  type UserBookingRow
+} from "~/types/types"
+import {
+  AuthContext,
+  ModalContext,
+  ThemeContext
+} from "~/react-contexts/context"
 import type { z, ZodFormattedError, ZodTypeAny } from "zod"
 import { toast } from "react-toastify"
 // Custom hook to debounce a fast-changing value. It delays updating the returned value until the user stops typing for the specified delay.
@@ -100,6 +107,15 @@ export function useAuth() {
   return context
 }
 
+//Custom hook to consume the modalContext, that stores a boolean value that decides if the modal is open or not
+export function useModalBooking() {
+  const context = useContext(ModalContext)
+  if (!context) {
+    throw new Error("Modal context does not exist in your app!")
+  }
+  return context
+}
+
 //Custom hook that provides a simple second-based countdown state and a formatted `MM:SS` string.
 export function useCountdown(initialTime = 0) {
   const [countdown, setCountdown] = useState(initialTime)
@@ -120,7 +136,6 @@ export function useCountdown(initialTime = 0) {
     isCounting: countdown > 0
   }
 }
-
 
 //Custom hook to handle React Router fetcher responses, automatically triggering toast notifications or form error updates.
 export function useFormToast<
@@ -145,4 +160,42 @@ export function useFormToast<
       }
     }
   }, [fetcherData])
+}
+
+// Custom hook to fetch and manage the current user's bookings. Automatically triggers when the associated modal/drawer opens.
+export const useUserBookings = (isOpen: boolean) => {
+  const [bookings, setBookings] = useState<UserBookingRow[]>()
+  const [bookingsCounter, setBookingsCounter] = useState(0)
+  const [isLoading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    if (!isOpen) return
+    const bringBookings = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        let res = await api.get<{
+          bookings: UserBookingRow[]
+          success: boolean
+          count: number
+        }>("/bookings")
+        if (res.data.success) {
+          setBookings(res.data.bookings)
+          setBookingsCounter(res.data.count)
+        }
+      } catch (err) {
+        let errorMessage =
+          "An unexpected error occurred while fetching bookings"
+        if (axios.isAxiosError(err)) {
+          errorMessage = err.response?.data?.message || err.message
+        }
+        setError(errorMessage)
+        console.error("Fetching bookings failed:", errorMessage)
+      } finally {
+        setLoading(false)
+      }
+    }
+    bringBookings()
+  }, [isOpen])
+  return { bookings, bookingsCounter, isLoading, error }
 }

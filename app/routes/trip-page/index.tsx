@@ -6,6 +6,7 @@ import { useLoaderData, useSearchParams } from "react-router"
 import { TripCard } from "./local_components/TripCard"
 import { GeneralDropdown } from "./local_components/GeneralDropdown"
 import { getMeta } from "~/helpers/helpers"
+import { ToastContainer } from "react-toastify"
 import {
   handleParamChange,
   requireAuthOnServer
@@ -13,6 +14,13 @@ import {
 import { CountryCodeSearcher } from "./local_components/CountryCodeSearcher"
 import { RangeInput } from "./local_components/RangeInput"
 import { SortDropdown } from "./local_components/SortDropdown"
+import {
+  useModalBooking,
+  useUserBookings
+} from "~/custom-hooks/react-hooks"
+import { useEffect, useState } from "react"
+import { type UserBookingRow } from "~/types/types"
+import BookingCartModal from "./local_components/BookingCartModal"
 
 export const meta = () =>
   getMeta(
@@ -62,6 +70,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 export default function TripPage() {
   let data = useLoaderData<typeof loader>()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { isModalBookingsOpen, setModalBookingsOpen } =
+    useModalBooking()
   const currentSearch = searchParams.get("search") || ""
   const currentMinPrice = searchParams.get("minPrice") || ""
   const currentMaxPrice = searchParams.get("maxPrice") || ""
@@ -72,6 +82,8 @@ export default function TripPage() {
       return prev
     })
   }
+  const { bookings, bookingsCounter, isLoading, error } =
+    useUserBookings(isModalBookingsOpen)
   return (
     <>
       <div className="w-full min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
@@ -236,6 +248,19 @@ export default function TripPage() {
             </button>
           </div>
         </div>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          closeOnClick={true}
+        />
+        {isModalBookingsOpen && (
+          <BookingCartModal
+            setModalBookingsOpen={setModalBookingsOpen}
+            bookings={bookings}
+            bookingCounter={bookingsCounter}
+            isLoading={isLoading}
+          />
+        )}
       </div>
     </>
   )
